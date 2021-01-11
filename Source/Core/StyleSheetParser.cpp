@@ -82,17 +82,21 @@ private:
 
 	PropertyDictionary properties;
 	PropertySpecification specification;
-	PropertyId id_rx, id_ry, id_rw, id_rh;
+	PropertyId id_rx, id_ry, id_rw, id_rh, id_crx, id_cry, id_orw, id_orh;
 	ShorthandId id_rectangle;
 
 public:
-	SpritesheetPropertyParser() : specification(4, 1) 
+	SpritesheetPropertyParser() : specification(8, 1) 
 	{
 		id_rx = specification.RegisterProperty("rectangle-x", "", false, false).AddParser("length").GetId();
 		id_ry = specification.RegisterProperty("rectangle-y", "", false, false).AddParser("length").GetId();
 		id_rw = specification.RegisterProperty("rectangle-w", "", false, false).AddParser("length").GetId();
 		id_rh = specification.RegisterProperty("rectangle-h", "", false, false).AddParser("length").GetId();
-		id_rectangle = specification.RegisterShorthand("rectangle", "rectangle-x, rectangle-y, rectangle-w, rectangle-h", ShorthandType::FallThrough);
+		id_crx = specification.RegisterProperty("rectangle-cx", "", false, false).AddParser("length").GetId();
+		id_cry = specification.RegisterProperty("rectangle-cy", "", false, false).AddParser("length").GetId();
+		id_orw = specification.RegisterProperty("rectangle-ow", "", false, false).AddParser("length").GetId();
+		id_orh = specification.RegisterProperty("rectangle-oh", "", false, false).AddParser("length").GetId();
+		id_rectangle = specification.RegisterShorthand("rectangle", "rectangle-x, rectangle-y, rectangle-w, rectangle-h, rectangle-cx, rectangle-cy, rectangle-ow, rectangle-oh", ShorthandType::FallThrough);
 	}
 
 	const String& GetImageSource() const
@@ -129,6 +133,14 @@ public:
 				rectangle.width = ComputeAbsoluteLength(*property, 1.f);
 			if (auto property = properties.GetProperty(id_rh))
 				rectangle.height = ComputeAbsoluteLength(*property, 1.f);
+			if (auto property = properties.GetProperty(id_crx))
+				rectangle.cropX = ComputeAbsoluteLength(*property, 1.f);
+			if (auto property = properties.GetProperty(id_cry))
+				rectangle.cropY = ComputeAbsoluteLength(*property, 1.f);
+			if (auto property = properties.GetProperty(id_orw))
+				rectangle.originalWidth = ComputeAbsoluteLength(*property, 1.f);
+			if (auto property = properties.GetProperty(id_orh))
+				rectangle.originalHeight = ComputeAbsoluteLength(*property, 1.f);
 
 			sprite_definitions.emplace_back(name, rectangle);
 		}

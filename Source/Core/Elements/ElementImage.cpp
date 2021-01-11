@@ -57,6 +57,8 @@ bool ElementImage::GetIntrinsicDimensions(Vector2f& _dimensions, float& _ratio)
 	// Calculate the x dimension.
 	if (HasAttribute("width"))
 		dimensions.x = GetAttribute< float >("width", -1);
+	else if (rect_source == RectSource::Sprite)
+		dimensions.x = rect.originalWidth;
 	else if (rect_source != RectSource::None)
 		dimensions.x = rect.width;
 	else
@@ -65,6 +67,8 @@ bool ElementImage::GetIntrinsicDimensions(Vector2f& _dimensions, float& _ratio)
 	// Calculate the y dimension.
 	if (HasAttribute("height"))
 		dimensions.y = GetAttribute< float >("height", -1);
+	else if (rect_source == RectSource::Sprite)
+		dimensions.y = rect.originalHeight;
 	else if (rect_source != RectSource::None)
 		dimensions.y = rect.height;
 	else
@@ -164,6 +168,9 @@ void ElementImage::GenerateGeometry()
 	vertices.resize(4);
 	indices.resize(6);
 
+	Vector2f quad_size = GetBox().GetSize(Box::CONTENT).Round();
+	Vector2f origin(0.0f);
+
 	// Generate the texture coordinates.
 	Vector2f texcoords[2];
 	if (rect_source != RectSource::None)
@@ -179,6 +186,11 @@ void ElementImage::GenerateGeometry()
 
 		texcoords[1].x = (rect.x + rect.width) / texture_dimensions.x;
 		texcoords[1].y = (rect.y + rect.height) / texture_dimensions.y;
+
+		origin.x += quad_size.x * (rect.cropX / rect.originalWidth);
+		origin.y += quad_size.y * (rect.cropY / rect.originalHeight);
+		quad_size.x *= rect.width / rect.originalWidth;
+		quad_size.y *= rect.height / rect.originalHeight;
 	}
 	else
 	{
@@ -192,9 +204,7 @@ void ElementImage::GenerateGeometry()
 	Colourb quad_colour = computed.image_color;
     quad_colour.alpha = (byte)(opacity * (float)quad_colour.alpha);
 	
-	Vector2f quad_size = GetBox().GetSize(Box::CONTENT).Round();
-
-	GeometryUtilities::GenerateQuad(&vertices[0], &indices[0], Vector2f(0, 0), quad_size, quad_colour, texcoords[0], texcoords[1]);
+	GeometryUtilities::GenerateQuad(&vertices[0], &indices[0], origin, quad_size, quad_colour, texcoords[0], texcoords[1]);
 
 	geometry_dirty = false;
 }

@@ -57,8 +57,6 @@ bool ElementImage::GetIntrinsicDimensions(Vector2f& _dimensions, float& _ratio)
 	// Calculate the x dimension.
 	if (HasAttribute("width"))
 		dimensions.x = GetAttribute< float >("width", -1);
-	else if (rect_source == RectSource::Sprite)
-		dimensions.x = rect.originalWidth;
 	else if (rect_source != RectSource::None)
 		dimensions.x = rect.width;
 	else
@@ -67,8 +65,6 @@ bool ElementImage::GetIntrinsicDimensions(Vector2f& _dimensions, float& _ratio)
 	// Calculate the y dimension.
 	if (HasAttribute("height"))
 		dimensions.y = GetAttribute< float >("height", -1);
-	else if (rect_source == RectSource::Sprite)
-		dimensions.y = rect.originalHeight;
 	else if (rect_source != RectSource::None)
 		dimensions.y = rect.height;
 	else
@@ -181,16 +177,11 @@ void ElementImage::GenerateGeometry()
 		if (texture_dimensions.y == 0)
 			texture_dimensions.y = 1;
 
-		texcoords[0].x = rect.x / texture_dimensions.x;
-		texcoords[0].y = rect.y / texture_dimensions.y;
+		texcoords[0].x = (rect.x + rect.cropLeft) / texture_dimensions.x;
+		texcoords[0].y = (rect.y + rect.cropTop) / texture_dimensions.y;
 
-		texcoords[1].x = (rect.x + rect.width) / texture_dimensions.x;
-		texcoords[1].y = (rect.y + rect.height) / texture_dimensions.y;
-
-		origin.x += quad_size.x * (rect.cropX / rect.originalWidth);
-		origin.y += quad_size.y * (rect.cropY / rect.originalHeight);
-		quad_size.x *= rect.width / rect.originalWidth;
-		quad_size.y *= rect.height / rect.originalHeight;
+		texcoords[1].x = (rect.x + rect.width - rect.cropRight) / texture_dimensions.x;
+		texcoords[1].y = (rect.y + rect.height - rect.cropBottom) / texture_dimensions.y;
 	}
 	else
 	{

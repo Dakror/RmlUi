@@ -37,8 +37,8 @@ struct Spritesheet;
 
 
 struct Rectangle {
-	Rectangle(float x = 0, float y = 0, float width = 0, float height = 0, float cropX = 0, float cropY = 0, float originalWidth = 0, float originalHeight = 0) : x(x), y(y), width(width), height(height), cropX(cropX), cropY(cropY), originalWidth(originalWidth), originalHeight(originalHeight) {}
-	float x, y, width, height, cropX, cropY, originalWidth, originalHeight;
+	Rectangle(float x = 0, float y = 0, float width = 0, float height = 0, float cropTop = 0, float cropRight = 0, float cropBottom = 0, float cropLeft = 0) : x(x), y(y), width(width), height(height), cropTop(cropTop), cropRight(cropRight), cropBottom(cropBottom), cropLeft(cropLeft) {}
+	float x, y, width, height, cropTop, cropRight, cropBottom, cropLeft;
 };
 
 struct Sprite {

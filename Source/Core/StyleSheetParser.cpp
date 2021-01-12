@@ -82,7 +82,7 @@ private:
 
 	PropertyDictionary properties;
 	PropertySpecification specification;
-	PropertyId id_rx, id_ry, id_rw, id_rh, id_crx, id_cry, id_orw, id_orh;
+	PropertyId id_rx, id_ry, id_rw, id_rh, id_ct, id_cr, id_cb, id_cl;
 	ShorthandId id_rectangle;
 
 public:
@@ -92,11 +92,11 @@ public:
 		id_ry = specification.RegisterProperty("rectangle-y", "", false, false).AddParser("length").GetId();
 		id_rw = specification.RegisterProperty("rectangle-w", "", false, false).AddParser("length").GetId();
 		id_rh = specification.RegisterProperty("rectangle-h", "", false, false).AddParser("length").GetId();
-		id_crx = specification.RegisterProperty("rectangle-cx", "", false, false).AddParser("length").GetId();
-		id_cry = specification.RegisterProperty("rectangle-cy", "", false, false).AddParser("length").GetId();
-		id_orw = specification.RegisterProperty("rectangle-ow", "", false, false).AddParser("length").GetId();
-		id_orh = specification.RegisterProperty("rectangle-oh", "", false, false).AddParser("length").GetId();
-		id_rectangle = specification.RegisterShorthand("rectangle", "rectangle-x, rectangle-y, rectangle-w, rectangle-h, rectangle-cx, rectangle-cy, rectangle-ow, rectangle-oh", ShorthandType::FallThrough);
+		id_ct = specification.RegisterProperty("rectangle-cr", "", false, false).AddParser("length").GetId();
+		id_cr = specification.RegisterProperty("rectangle-ct", "", false, false).AddParser("length").GetId();
+		id_cb = specification.RegisterProperty("rectangle-cb", "", false, false).AddParser("length").GetId();
+		id_cl = specification.RegisterProperty("rectangle-cl", "", false, false).AddParser("length").GetId();
+		id_rectangle = specification.RegisterShorthand("rectangle", "rectangle-x, rectangle-y, rectangle-w, rectangle-h, rectangle-cr, rectangle-ct, rectangle-cb, rectangle-cl", ShorthandType::FallThrough);
 	}
 
 	const String& GetImageSource() const
@@ -133,17 +133,31 @@ public:
 			if (auto property = properties.GetProperty(id_ry))
 				rectangle.y = ComputeAbsoluteLength(*property, 1.f);
 			if (auto property = properties.GetProperty(id_rw))
-				rectangle.originalWidth = rectangle.width = ComputeAbsoluteLength(*property, 1.f);
+				rectangle.width = ComputeAbsoluteLength(*property, 1.f);
 			if (auto property = properties.GetProperty(id_rh))
-				rectangle.originalHeight = rectangle.height = ComputeAbsoluteLength(*property, 1.f);
-			if (auto property = properties.GetProperty(id_crx))
-				rectangle.cropX = ComputeAbsoluteLength(*property, 1.f);
-			if (auto property = properties.GetProperty(id_cry))
-				rectangle.cropY = ComputeAbsoluteLength(*property, 1.f);
-			if (auto property = properties.GetProperty(id_orw))
-				rectangle.originalWidth = ComputeAbsoluteLength(*property, 1.f);
-			if (auto property = properties.GetProperty(id_orh))
-				rectangle.originalHeight = ComputeAbsoluteLength(*property, 1.f);
+				rectangle.height = ComputeAbsoluteLength(*property, 1.f);
+			if (auto property = properties.GetProperty(id_ct))
+			{
+				rectangle.cropTop = ComputeAbsoluteLength(*property, 1.f);
+				rectangle.y -= rectangle.cropTop;
+				rectangle.height += rectangle.cropTop;
+			}
+			if (auto property = properties.GetProperty(id_cr))
+			{
+				rectangle.cropRight = ComputeAbsoluteLength(*property, 1.f);
+				rectangle.width += rectangle.cropRight;
+			}
+			if (auto property = properties.GetProperty(id_cb))
+			{
+				rectangle.cropBottom = ComputeAbsoluteLength(*property, 1.f);
+				rectangle.height += rectangle.cropBottom;
+			}
+			if (auto property = properties.GetProperty(id_cl))
+			{
+				rectangle.cropLeft = ComputeAbsoluteLength(*property, 1.f);
+				rectangle.x -= rectangle.cropLeft;
+				rectangle.width += rectangle.cropLeft;
+			}
 
 			sprite_definitions.emplace_back(name, rectangle);
 		}

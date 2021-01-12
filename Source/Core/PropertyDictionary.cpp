@@ -49,6 +49,12 @@ void PropertyDictionary::RemoveProperty(PropertyId id)
 	properties.erase(id);
 }
 
+// Removes all property values from the dictionary.
+void PropertyDictionary::ClearProperties()
+{
+	properties.clear();
+}
+
 // Returns the value of the property with the requested name, if one exists.
 const Property* PropertyDictionary::GetProperty(PropertyId id) const
 {

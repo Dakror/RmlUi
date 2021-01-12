@@ -121,6 +121,9 @@ public:
 		}
 		else
 		{
+			// Clear all pre-existing values since the amount of parameters is variable
+			properties.ClearProperties();
+			
 			if (!specification.ParseShorthandDeclaration(properties, id_rectangle, value))
 				return false;
 
@@ -130,9 +133,9 @@ public:
 			if (auto property = properties.GetProperty(id_ry))
 				rectangle.y = ComputeAbsoluteLength(*property, 1.f);
 			if (auto property = properties.GetProperty(id_rw))
-				rectangle.width = ComputeAbsoluteLength(*property, 1.f);
+				rectangle.originalWidth = rectangle.width = ComputeAbsoluteLength(*property, 1.f);
 			if (auto property = properties.GetProperty(id_rh))
-				rectangle.height = ComputeAbsoluteLength(*property, 1.f);
+				rectangle.originalHeight = rectangle.height = ComputeAbsoluteLength(*property, 1.f);
 			if (auto property = properties.GetProperty(id_crx))
 				rectangle.cropX = ComputeAbsoluteLength(*property, 1.f);
 			if (auto property = properties.GetProperty(id_cry))

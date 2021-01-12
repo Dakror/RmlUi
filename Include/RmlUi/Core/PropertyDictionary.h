@@ -51,6 +51,9 @@ public:
 	void RemoveProperty(PropertyId id);
 	/// Returns the value of the property with the requested id, if one exists.
 	const Property* GetProperty(PropertyId id) const;
+	/// Removes all property values from the dictionary.
+	void ClearProperties();
+
 
 	/// Returns the number of properties in the dictionary.
 	int GetNumProperties() const;

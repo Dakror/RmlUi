@@ -88,8 +88,9 @@ public:
 	const StyleSheet* GetStyleSheet() const override;
 	/// Sets the style sheet this document, and all of its children, uses.
 	void SetStyleSheetContainer(SharedPtr<StyleSheetContainer> style_sheet);
-	/// Returns the document's style sheet container.
-	const SharedPtr<StyleSheetContainer>& GetStyleSheetContainer() const override;
+	/// Returns the active style sheet container for this element.
+	/// @return The element's style sheet container.
+	const SharedPtr<StyleSheetContainer>& GetStyleSheetContainer() const;
 	/// Reload the document's style sheet from source files.
 	/// Styles will be reloaded from <style> tags and external style sheets, but not inline 'style' attributes.
 	/// @note The source url originally used to load the document must still be a valid RML document.
@@ -158,6 +159,9 @@ private:
 	/// Returns true if the document has been marked as needing a re-layout.
 	bool IsLayoutDirty() override;
 
+	/// Notify the document that media query related properties have changed and that stylesheets need to be re-evaluated.
+	void DirtyMediaQueries();
+	
 	/// Updates all sizes defined by the 'dp' unit.
 	void DirtyDpProperties();
 

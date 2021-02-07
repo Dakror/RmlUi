@@ -43,6 +43,7 @@ class Decorator;
 class FontEffect;
 class SpritesheetList;
 class Stream;
+class StyleSheetContainer;
 class StyleSheetParser;
 struct Sprite;
 struct Spritesheet;
@@ -60,11 +61,14 @@ public:
 	typedef Vector< StyleSheetNode* > NodeList;
 	typedef UnorderedMap< size_t, NodeList > NodeIndex;
 
-	StyleSheet();
 	virtual ~StyleSheet();
 
 	/// Combines this style sheet with another one, producing a new sheet.
 	UniquePtr<StyleSheet> CombineStyleSheet(const StyleSheet& sheet) const;
+
+	/// Creates an exact copy of this style sheet.
+	UniquePtr<StyleSheet> Clone() const;
+
 	/// Builds the node index for a combined style sheet.
 	void BuildNodeIndex();
 	/// Optimizes some properties for faster retrieval.
@@ -94,6 +98,8 @@ public:
 	static size_t NodeHash(const String& tag, const String& id);
 
 private:
+	StyleSheet();
+	
 	// Root level node, attributes from special nodes like "body" get added to this node
 	UniquePtr<StyleSheetNode> root;
 
@@ -121,6 +127,7 @@ private:
 	mutable ElementDefinitionCache node_cache;
 
 	friend StyleSheetParser;
+	friend StyleSheetContainer;
 };
 
 } // namespace Rml

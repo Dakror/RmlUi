@@ -291,18 +291,11 @@ String Element::GetClassNames() const
 }
 
 // Returns the active style sheet for this element. This may be nullptr.
-const SharedPtr<StyleSheet>& Element::GetStyleSheet() const
+const StyleSheet* Element::GetStyleSheet() const
 {
 	if (ElementDocument * document = GetOwnerDocument())
 		return document->GetStyleSheet();
-	static SharedPtr<StyleSheet> null_style_sheet;
-	return null_style_sheet;
-}
-
-// Returns the element's definition.
-const ElementDefinition* Element::GetDefinition()
-{
-	return meta->style.GetDefinition();
+	return nullptr;
 }
 
 // Fills an String with the full address of this element.
@@ -2533,10 +2526,10 @@ void Element::HandleAnimationProperty()
 
 		const AnimationList& animation_list = meta->computed_values.animation;
 		bool element_has_animations = (!animation_list.empty() || !animations.empty());
-		StyleSheet* stylesheet = nullptr;
+		const StyleSheet* stylesheet = nullptr;
 
 		if (element_has_animations)
-			stylesheet = GetStyleSheet().get();
+			stylesheet = GetStyleSheet();
 
 		if (stylesheet)
 		{

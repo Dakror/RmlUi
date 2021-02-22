@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,33 +26,49 @@
  *
  */
 
-#ifndef RMLUI_TESTS_COMMON_TESTSSHELL_H
-#define RMLUI_TESTS_COMMON_TESTSSHELL_H
+#include "PropertyParserRatio.h"
 
-#include <RmlUi/Core/Types.h>
-namespace Rml { class RenderInterface; }
+namespace Rml {
 
-namespace TestsShell {
-
-	// Will initialize the shell and create a context on first use.
-	Rml::Context* GetContext();
-
-	void PrepareRenderBuffer();
-	void PresentRenderBuffer();
-
-	// Render the current state of the context. Press 'escape' or 'return' to break out of the loop.
-	// Useful for viewing documents while building the RML to benchmark.
-	// Applies only when compiled with the shell backend.
-	void RenderLoop();
-
-	void ShutdownShell();
-
-	// Set the number of expected warnings and errors logged by RmlUi until the next call to this function
-	// or until 'ShutdownShell()'.
-	void SetNumExpectedWarnings(int num_warnings);
-
-	// Stats only available for the dummy renderer.
-	Rml::String GetRenderStats();
+PropertyParserRatio::PropertyParserRatio()
+{
 }
 
-#endif
+PropertyParserRatio::~PropertyParserRatio()
+{
+}
+
+// Called to parse a RCSS string declaration.
+bool PropertyParserRatio::ParseValue(Property& property, const String& value, const ParameterMap& RMLUI_UNUSED_PARAMETER(parameters)) const
+{
+	RMLUI_UNUSED(parameters);
+
+	StringList parts;
+	StringUtilities::ExpandString(parts, value, '/');
+
+	if(parts.size() != 2)
+	{
+		return false;
+	}
+
+	float first_value = 0;
+	if (!TypeConverter<String, float>::Convert(parts[0], first_value))
+	{
+		// Number conversion failed
+		return false;
+	}
+	
+	float second_value = 0;
+	if (!TypeConverter<String, float>::Convert(parts[1], second_value))
+	{
+		// Number conversion failed
+		return false;
+	}
+
+	property.value = Variant(first_value / second_value);
+	property.unit = Property::NUMBER;
+
+	return true;
+}
+
+} // namespace Rml

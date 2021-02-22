@@ -30,7 +30,6 @@
 #include "ElementDefinition.h"
 #include "StyleSheetFactory.h"
 #include "StyleSheetNode.h"
-#include "StyleSheetParser.h"
 #include "Utilities.h"
 #include "../../Include/RmlUi/Core/DecoratorInstancer.h"
 #include "../../Include/RmlUi/Core/Element.h"
@@ -60,19 +59,12 @@ StyleSheet::~StyleSheet()
 {
 }
 
-bool StyleSheet::LoadStyleSheet(Stream* stream, int begin_line_number)
-{
-	StyleSheetParser parser;
-	specificity_offset = parser.Parse(root.get(), stream, *this, keyframes, decorator_map, spritesheet_list, begin_line_number);
-	return specificity_offset >= 0;
-}
-
 /// Combines this style sheet with another one, producing a new sheet
-SharedPtr<StyleSheet> StyleSheet::CombineStyleSheet(const StyleSheet& other_sheet) const
+UniquePtr<StyleSheet> StyleSheet::CombineStyleSheet(const StyleSheet& other_sheet) const
 {
 	RMLUI_ZoneScoped;
 
-	SharedPtr<StyleSheet> new_sheet = MakeShared<StyleSheet>();
+	UniquePtr<StyleSheet> new_sheet = UniquePtr<StyleSheet>(new StyleSheet());
 	
 	new_sheet->root = root->DeepCopy();
 	new_sheet->root->MergeHierarchy(other_sheet.root.get(), specificity_offset);
@@ -104,6 +96,11 @@ SharedPtr<StyleSheet> StyleSheet::CombineStyleSheet(const StyleSheet& other_shee
 	return new_sheet;
 }
 
+UniquePtr<StyleSheet> StyleSheet::Clone() const
+{
+	return CombineStyleSheet(StyleSheet{});
+}
+
 // Builds the node index for a combined style sheet.
 void StyleSheet::BuildNodeIndex()
 {
@@ -121,7 +118,7 @@ void StyleSheet::OptimizeNodeProperties()
 }
 
 // Returns the Keyframes of the given name, or null if it does not exist.
-Keyframes * StyleSheet::GetKeyframes(const String & name)
+const Keyframes * StyleSheet::GetKeyframes(const String & name) const
 {
 	auto it = keyframes.find(name);
 	if (it != keyframes.end())
@@ -370,7 +367,7 @@ SharedPtr<ElementDefinition> StyleSheet::GetElementDefinition(const Element* ele
 			// Now see if we satisfy all of the requirements not yet tested: classes, pseudo classes, structural selectors, 
 			// and the full requirements of parent nodes. What this involves is traversing the style nodes backwards, 
 			// trying to match nodes in the element's hierarchy to nodes in the style hierarchy.
-			for (StyleSheetNode* node : nodes)
+			for (const StyleSheetNode* node : nodes)
 			{
 				if (node->IsApplicable(element, true))
 				{

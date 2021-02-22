@@ -154,16 +154,24 @@ void TestsShell::ShutdownShell()
 		RMLUI_ASSERTMSG(shell_context->GetNumDocuments() == num_documents_begin, "Make sure all previously opened documents have been closed.");
 		(void)num_documents_begin;
 
+		tests_system_interface.SetNumExpectedWarnings(0);
+
 		Rml::Shutdown();
 
 #ifdef RMLUI_TESTS_USE_SHELL
 		Shell::CloseWindow();
 		Shell::Shutdown();
+		shell_render_interface.SetContext(nullptr);
 #endif
 
 		shell_context = nullptr;
 		shell_initialized = false;
 	}
+}
+
+void TestsShell::SetNumExpectedWarnings(int num_warnings)
+{
+	tests_system_interface.SetNumExpectedWarnings(num_warnings);
 }
 
 Rml::String TestsShell::GetRenderStats()

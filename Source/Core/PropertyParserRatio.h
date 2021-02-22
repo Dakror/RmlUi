@@ -15,7 +15,7 @@
  *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- *
+ * 
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,33 +26,32 @@
  *
  */
 
-#ifndef RMLUI_TESTS_COMMON_TESTSSHELL_H
-#define RMLUI_TESTS_COMMON_TESTSSHELL_H
+#ifndef RMLUI_CORE_PROPERTYPARSERRATIO_H
+#define RMLUI_CORE_PROPERTYPARSERRATIO_H
 
-#include <RmlUi/Core/Types.h>
-namespace Rml { class RenderInterface; }
+#include "../../Include/RmlUi/Core/PropertyParser.h"
 
-namespace TestsShell {
+namespace Rml {
 
-	// Will initialize the shell and create a context on first use.
-	Rml::Context* GetContext();
+/**
+	A property parser that parses an ratio in the format of x/y, like 16/9.
 
-	void PrepareRenderBuffer();
-	void PresentRenderBuffer();
+	@author Maximilian Stark
+ */
 
-	// Render the current state of the context. Press 'escape' or 'return' to break out of the loop.
-	// Useful for viewing documents while building the RML to benchmark.
-	// Applies only when compiled with the shell backend.
-	void RenderLoop();
+class PropertyParserRatio : public PropertyParser
+{
+public:
+	PropertyParserRatio();
+	virtual ~PropertyParserRatio();
 
-	void ShutdownShell();
+	/// Called to parse a RCSS string declaration.
+	/// @param[out] property The property to set the parsed value on.
+	/// @param[in] value The raw value defined for this property.
+	/// @param[in] parameters The parameters defined for this property; not used for this parser.
+	/// @return True if the value was validated successfully, false otherwise.
+	bool ParseValue(Property& property, const String& value, const ParameterMap& parameters) const override;
+};
 
-	// Set the number of expected warnings and errors logged by RmlUi until the next call to this function
-	// or until 'ShutdownShell()'.
-	void SetNumExpectedWarnings(int num_warnings);
-
-	// Stats only available for the dummy renderer.
-	Rml::String GetRenderStats();
-}
-
+} // namespace Rml
 #endif

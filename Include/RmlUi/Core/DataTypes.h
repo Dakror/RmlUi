@@ -31,6 +31,7 @@
 
 #include "Header.h"
 #include "Types.h"
+#include <type_traits>
 
 namespace Rml {
 
@@ -48,6 +49,12 @@ using DataEventFunc = Function<void(DataModelHandle, Event&, const VariantList&)
 template<typename T> using MemberGetFunc = void(T::*)(Variant&);
 template<typename T> using MemberSetFunc = void(T::*)(const Variant&);
 
+template<typename T> using DataTypeGetFunc = void(*)(const T*, Variant&);
+template<typename T> using DataTypeSetFunc = void(*)(T*, const Variant&);
+
+template<typename Object, typename ReturnType> using MemberGetterFunc = ReturnType(Object::*)();
+template<typename Object, typename AssignType> using MemberSetterFunc = void(Object::*)(AssignType);
+
 using DirtyVariables = SmallUnorderedSet<String>;
 
 struct DataAddressEntry {
@@ -57,6 +64,68 @@ struct DataAddressEntry {
 	int index;
 };
 using DataAddress = Vector<DataAddressEntry>;
+
+// DataPointer is a wrapper around void* which preserves the constness of the underlying object.
+class DataPointer {
+public:
+	DataPointer(std::nullptr_t) : ptr(nullptr), cptr(nullptr) {};
+	DataPointer(void* p) : ptr(p), cptr(p) {};
+	DataPointer(const void* p) : ptr(nullptr), cptr(p) {};
+
+	template<typename T, typename std::enable_if<!std::is_const<typename std::remove_pointer<T>::type>::value, int>::type = 0>
+	T Get() {
+		return static_cast<T>(ptr);
+	}
+	template<typename T, typename std::enable_if<std::is_const<typename std::remove_pointer<T>::type>::value, int>::type = 0>
+	T Get() {
+		return static_cast<T>(cptr);
+	}
+
+private:
+	void* ptr = nullptr;
+	const void* cptr = nullptr;
+};
+
+template<class T>
+struct PointerTraits {
+	using is_pointer = std::false_type;
+	using element_type = T;
+	// Dereference() function intentionally missing.
+};
+template<class T>
+struct PointerTraits<T*> {
+	using is_pointer = std::true_type;
+	using element_type = T;
+	static DataPointer Dereference(DataPointer ptr) {
+		return DataPointer(*ptr.Get<T**>());
+	}
+};
+template<class T>
+struct PointerTraits<UniquePtr<T>> {
+	using is_pointer = std::true_type;
+	using element_type = T;
+	static DataPointer Dereference(DataPointer ptr) {
+		return DataPointer(ptr.Get<UniquePtr<T>*>()->get());
+	}
+};
+template<class T>
+struct PointerTraits<SharedPtr<T>> {
+	using is_pointer = std::true_type;
+	using element_type = T;
+	static DataPointer Dereference(DataPointer ptr) {
+		return DataPointer(ptr.Get<SharedPtr<T>*>()->get());
+	}
+};
+
+struct VoidMemberFunc {};
+template<typename T> using IsVoidMemberFunc = std::is_same<T, VoidMemberFunc>;
+
+
+
+
+#define RMLUI_LOG_TYPE_ERROR(T, msg) RMLUI_ERRORMSG((String(msg) + String("\nT: ") + String(rmlui_type_name<T>())).c_str())
+#define RMLUI_LOG_TYPE_ERROR_ASSERT(T, val, msg) RMLUI_ASSERTMSG((val), (String(msg) + String("\nT: ") + String(rmlui_type_name<T>())).c_str())
+
 
 } // namespace Rml
 #endif

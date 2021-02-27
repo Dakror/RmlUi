@@ -1,0 +1,47 @@
+<rml>
+    <head>
+        <title>Overflow set to 'auto' establishes a new block formatting context</title>
+        <link rel="author" title="Microsoft" href="http://www.microsoft.com/" />
+        <link rel="help" href="http://www.w3.org/TR/CSS21/visuren.html#block-formatting" />
+        <link rel="reference" href="https://test.csswg.org/suites/css21_dev/20110323/html4/block-formatting-contexts-014.htm" />
+        <meta name="flags" content="" />
+        <link type="text/rcss" href="../style.rcss"/>
+        <meta name="assert" content="A new block formatting context is established when overflow is set to 'auto'." />
+        <style>
+            #div1
+            {
+                height: 200px;
+                width: 200px;
+            }
+            div div
+            {
+                height: 50px;
+                width: 50px;
+            }
+            #div2
+            {
+                background: blue;
+                float: left;
+            }
+            #div3
+            {
+                overflow: auto;
+            }
+            div div div
+            {
+                background: orange;
+                height: 1in;
+                width: 1in;
+            }
+        </style>
+    </head>
+    <body>
+        <p>Test passes if the blue and orange boxes (including any scrolling mechanism) below are the same size.</p>
+        <div id="div1">
+            <div id="div2"></div>
+            <div id="div3">
+                <div></div>
+            </div>
+        </div>
+    </body>
+</rml>

@@ -93,9 +93,6 @@ private:
 // Literal data variable constructor
 RMLUICORE_API DataVariable MakeLiteralIntVariable(int value);
 
-// Literal data variable constructor
-RMLUICORE_API DataVariable MakeLiteralStringVariable(const char* value);
-
 
 template<typename T>
 class ScalarDefinition final : public VariableDefinition {
@@ -202,7 +199,7 @@ protected:
 		auto it = ptr->begin();
 		std::advance(it, index);
 
-		DataPointer next_ptr = &(*it);
+		DataPointer next_ptr = &(it);
 		return DataVariable(underlying_definition, next_ptr);
 	}
 

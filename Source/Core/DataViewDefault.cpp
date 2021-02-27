@@ -470,14 +470,7 @@ bool DataViewFor::Update(DataModel& model) {
 
             DataAddress iterator_index_address;
             if (type == DataVariableType::Array)
-            {
                 iterator_index_address = {{"literal"}, {"int"}, {i}};
-            }
-            else if (type == DataVariableType::StringMap) 
-            {
-                auto iterator = 
-                iterator_index_address = {{"literal"}, {"string"}, {i}};
-            }
 
             model.InsertAlias(new_element_ptr.get(), iterator_name, std::move(iterator_address));
             model.InsertAlias(new_element_ptr.get(), iterator_index_name, std::move(iterator_index_address));

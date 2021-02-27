@@ -113,6 +113,13 @@ public:
 	template<typename Container>
 	bool RegisterArray();
 
+	// Register a string map type.
+	// @note The type applies to every data model associated with the current Context.
+	// @note If 'Container::mapped_type' represents a non-scalar type, that type must already have been registered with the appropriate 'Register...()' functions.
+	// @note Container requires the following functions to be implemented: size(), find(), begin() and end(). This is satisfied by several containers such as std::map and std::unordered_map.
+	template<typename Container>
+	bool RegisterStringMap();
+
 	// Register a transform function.
 	// A transform function modifies a variant with optional arguments. It can be called in data expressions using the pipe '|' operator.
 	// @note The transform function applies to every data model associated with the current Context.
@@ -183,6 +190,28 @@ inline bool DataModelConstructor::RegisterArray()
 	if (!inserted)
 	{
 		RMLUI_LOG_TYPE_ERROR(Container, "Array type already declared.");
+		return false;
+	}
+
+	return true;
+}
+
+template<typename Container>
+inline bool DataModelConstructor::RegisterStringMap()
+{
+	using mapped_type = typename Container::mapped_type;
+	VariableDefinition* value_variable = type_register->GetDefinition<mapped_type>();
+	RMLUI_LOG_TYPE_ERROR_ASSERT(mapped_type, value_variable, "Underlying mapped type of string map has not been registered.");
+	if (!value_variable)
+		return false;
+
+	const FamilyId container_id = Family<Container>::Id();
+	auto stringmap_definition = MakeUnique<StringMapDefinition<Container>>(value_variable);
+
+	const bool inserted = type_register->RegisterDefinition(container_id, std::move(stringmap_definition));
+	if (!inserted)
+	{
+		RMLUI_LOG_TYPE_ERROR(Container, "String map type already declared.");
 		return false;
 	}
 

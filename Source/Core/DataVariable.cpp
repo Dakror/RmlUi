@@ -85,6 +85,23 @@ DataVariable MakeLiteralIntVariable(int value)
     return DataVariable(&literal_int_definition, reinterpret_cast<const void*>(static_cast<intptr_t>(value)));
 }
 
+class LiteralStringDefinition final : public VariableDefinition {
+public:
+    LiteralStringDefinition() : VariableDefinition(DataVariableType::Scalar) {}
+
+    bool Get(DataPointer ptr, Variant& variant) override
+    {
+        variant = static_cast<String>(reinterpret_cast<const char*>(ptr.Get<const void*>()));
+        return true;
+    }
+};
+
+DataVariable MakeLiteralStringVariable(const char* value)
+{
+    static LiteralStringDefinition literal_string_definition;
+    return DataVariable(&literal_string_definition, reinterpret_cast<const void*>(value));
+}
+
 StructDefinition::StructDefinition() : VariableDefinition(DataVariableType::Struct)
 {}
 

@@ -452,6 +452,7 @@ bool DataViewFor::Update(DataModel& model) {
     DataVariable variable = model.GetVariable(container_address);
     if (!variable)
         return false;
+    DataVariableType type = variable.Type();
 
     bool result = false;
     const int size = variable.Size();
@@ -467,8 +468,16 @@ bool DataViewFor::Update(DataModel& model) {
             iterator_address = container_address;
             iterator_address.push_back(DataAddressEntry(i));
 
-            DataAddress iterator_index_address = {
-                {"literal"}, {"int"}, {i}};
+            DataAddress iterator_index_address;
+            if (type == DataVariableType::Array)
+            {
+                iterator_index_address = {{"literal"}, {"int"}, {i}};
+            }
+            else if (type == DataVariableType::StringMap) 
+            {
+                auto iterator = 
+                iterator_index_address = {{"literal"}, {"string"}, {i}};
+            }
 
             model.InsertAlias(new_element_ptr.get(), iterator_name, std::move(iterator_address));
             model.InsertAlias(new_element_ptr.get(), iterator_index_name, std::move(iterator_index_address));

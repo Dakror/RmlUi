@@ -38,7 +38,7 @@
 
 namespace Rml {
 
-enum class DataVariableType { Scalar, Array, Struct };
+enum class DataVariableType { Scalar, Array, Struct, StringMap };
 
 
 /*
@@ -92,6 +92,9 @@ private:
 
 // Literal data variable constructor
 RMLUICORE_API DataVariable MakeLiteralIntVariable(int value);
+
+// Literal data variable constructor
+RMLUICORE_API DataVariable MakeLiteralStringVariable(const char* value);
 
 
 template<typename T>
@@ -160,6 +163,51 @@ public:
 
 private:
 	SmallUnorderedMap<String, UniquePtr<VariableDefinition>> members;
+};
+
+template<typename Container>
+class RMLUICORE_API StringMapDefinition final : public VariableDefinition {
+public:
+	StringMapDefinition(VariableDefinition* underlying_definition) : VariableDefinition(DataVariableType::StringMap) , underlying_definition(underlying_definition) {}
+
+	int Size(DataPointer ptr) override {
+		return int(ptr.Get<Container*>()->size());
+	}
+
+protected:
+	DataVariable Child(DataPointer void_ptr, const DataAddressEntry& address) override
+	{
+		Container* ptr = void_ptr.Get<Container*>();
+		const int index = address.index;
+
+		const int container_size = int(ptr->size());
+
+		if (index < 0 || index >= container_size)
+		{
+			if (address.name == "size")
+				return MakeLiteralIntVariable(int(ptr->size()));
+
+			auto it = ptr->find(address.name);
+
+			if(it == ptr->end()) 
+			{
+				Log::Message(Log::LT_WARNING, "Data string map key not found.");
+				return DataVariable();
+			}
+
+			DataPointer next_ptr = &(*it);
+			return DataVariable(underlying_definition, next_ptr);
+		}
+		
+		auto it = ptr->begin();
+		std::advance(it, index);
+
+		DataPointer next_ptr = &(*it);
+		return DataVariable(underlying_definition, next_ptr);
+	}
+
+private:
+	VariableDefinition* underlying_definition;
 };
 
 

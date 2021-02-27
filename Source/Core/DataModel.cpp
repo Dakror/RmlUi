@@ -301,8 +301,11 @@ DataVariable DataModel::GetVariable(const DataAddress& address) const
 
 	if (address[0].name == "literal")
 	{
-		if (address.size() > 2 && address[1].name == "int")
-			return MakeLiteralIntVariable(address[2].index);
+		if (address.size() > 2)
+			if(address[1].name == "int")
+				return MakeLiteralIntVariable(address[2].index);
+			if(address[1].name == "string")
+				return MakeLiteralStringVariable(address[2].name.c_str());
 	}
 
 	return DataVariable();
